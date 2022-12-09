@@ -197,7 +197,7 @@ async function downloadFile(session, file, settings) {
         // Set download behavior
         await page._client.send('Page.setDownloadBehavior', {behavior: 'allow', downloadPath: tmpDownloadDir});
 
-        
+
         // Debug: making screenshot and saving the page content
         if(settings.debugDir && settings.doDebug) {
             fs.writeFile(debugDir + title + '_content' + '.html', content, () => {});
@@ -241,7 +241,6 @@ async function downloadFile(session, file, settings) {
             }
         }
         
-        // const saveFileBox = await submenuFileHandle.boundingBox();
         if (!saveFileBox.x || !saveFileBox.y) {
             try {
                 const newFileItem = await page.waitForSelector('div[data-testid="dropdown-option-New design file"]', {timeout: settings.selectorTimeout});
@@ -265,7 +264,9 @@ async function downloadFile(session, file, settings) {
         let downloadError = false;
 
         for(let j = 0; downloadedCheckTries == 0 || j < downloadedCheckTries; j++) {
+
             await sleep(1000);
+
             fs.readdir(tmpDownloadDir, (err, files) => {
                 try {
                     let donwloadedFile = ''
