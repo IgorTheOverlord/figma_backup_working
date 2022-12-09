@@ -1,16 +1,15 @@
-
-const loginPageUrl = 'https://www.figma.com/login';
-const filePageBaseUrl = 'https://www.figma.com/file/';
-const usernameSelector = 'input[name="email"]';
-const passwordSelector = 'input[name="password"]';
-const buttonSelector = 'button[type="submit"]';
+const loginPageUrl        = 'https://www.figma.com/login';
+const filePageBaseUrl     = 'https://www.figma.com/file/';
+const usernameSelector    = 'input[name="email"]';
+const passwordSelector    = 'input[name="password"]';
+const buttonSelector      = 'button[type="submit"]';
 const filebrowserSelector = '#filebrowser-loading-page';
 
 const puppeteer = require('puppeteer');
-const fs = require('fs');
-const fse = require('fs-extra');
-const {sleep} = require('./utils');
-const log4js = require('log4js');
+const fs        = require('fs');
+const fse       = require('fs-extra');
+const {sleep}   = require('./utils');
+const log4js    = require('log4js');
 
 const logger = log4js.getLogger();
 logger.level = "info";
@@ -23,19 +22,18 @@ log4js.configure({
     },
     categories: { default: { appenders: ['out'], level: 'info' } }
   });
-
 function readSettings() {
     const settings = {
-        downloadTimeout: 360,
-        selectorTimeout: 5000,
+        downloadTimeout:      360,
+        selectorTimeout:     5000,
         navigationTimeout: 180000,
-        launchTimeout: 120000,
-        loginTimeout: 10000,
-        pageOpenTimeout: 10000,
-        pageLoadTimeout: 60000,
-        downloadsBaseDir: './process/_downloads',
-        debugDir: './process/debug/',
-        doDebug: false,
+        launchTimeout:     120000,
+        loginTimeout:       10000,
+        pageOpenTimeout:    10000,
+        pageLoadTimeout:    60000,
+        downloadsBaseDir:  './process/_downloads',
+        debugDir:          './process/debug/',
+        doDebug:           false,
         saveScreenOnError: true
     }
 
@@ -43,16 +41,17 @@ function readSettings() {
         const data = fs.readFileSync('./config/download_settings.json');
         newSettings = JSON.parse(data);
 
-        settings.downloadTimeout = newSettings.downloadTimeout ?? settings.downloadTimeout;
-        settings.selectorTimeout = newSettings.selectorTimeout ?? settings.selectorTimeout;
+        settings.downloadTimeout   = newSettings.downloadTimeout   ?? settings.downloadTimeout;
+        settings.selectorTimeout   = newSettings.selectorTimeout   ?? settings.selectorTimeout;
         settings.navigationTimeout = newSettings.navigationTimeout ?? settings.navigationTimeout;
-        settings.launchTimeout = newSettings.launchTimeout ?? settings.launchTimeout;
-        settings.loginTimeout = newSettings.loginTimeout ?? settings.loginTimeout;
-        settings.pageOpenTimeout = newSettings.pageOpenTimeout ?? settings.pageOpenTimeout;
-        settings.doDebug = newSettings.doDebug ?? settings.doDebug;
+        settings.launchTimeout     = newSettings.launchTimeout     ?? settings.launchTimeout;
+        settings.loginTimeout      = newSettings.loginTimeout      ?? settings.loginTimeout;
+        settings.pageOpenTimeout   = newSettings.pageOpenTimeout   ?? settings.pageOpenTimeout;
+        settings.doDebug           = newSettings.doDebug           ?? settings.doDebug;
         settings.saveScreenOnError = newSettings.saveScreenOnError ?? settings.saveScreenOnError;
-        settings.pageLoadTimeout = newSettings.pageLoadTimeout ?? settings.pageLoadTimeout;
+        settings.pageLoadTimeout   = newSettings.pageLoadTimeout   ?? settings.pageLoadTimeout;
     }
+
     return settings;
 }
 
@@ -105,13 +104,13 @@ async function login(session, settings) {
 }
 
 
-const HTTP_NOT_200 = -1;
-const SAVE_NOT_ALLOWED = -2;
-const BAD_FILE_FORMAT = -3;
+const HTTP_NOT_200          = -1;
+const SAVE_NOT_ALLOWED      = -2;
+const BAD_FILE_FORMAT       = -3;
 const CANNOT_OPEN_MAIN_MENU = -4;
 const CANNOT_OPEN_FILE_MENU = -5;
-const DOWNLOAD_FAILED = -6;
-const UNKNOWN_ERROR = -7;
+const DOWNLOAD_FAILED       = -6;
+const UNKNOWN_ERROR         = -7;
 
 
 async function downloadFile(session, file, settings) {
