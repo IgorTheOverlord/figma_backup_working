@@ -186,9 +186,8 @@ async function downloadFile(session, file, settings) {
 
 
         await page.evaluate(_ => {
-            const mainMenu = document.querySelector('div[data-tooltip="main-menu"]');
-            const clickEvt =  document.createEvent("MouseEvents");
-            clickEvt.initEvent("mousedown", true, true); 
+            const mainMenu = document.querySelector('button[data-tooltip="main-menu"]');
+            var clickEvt = new Event("mousedown", {"bubbles": true, "cancelable": true}) 
             mainMenu.dispatchEvent(clickEvt);
             });
         
