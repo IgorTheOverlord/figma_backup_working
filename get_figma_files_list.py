@@ -49,6 +49,7 @@ class FigmaFilesListGetter(object):
         }
 
     def _get_team_projects(self, team_id: str) -> list:
+
         api_request_url = f'https://api.figma.com/v1/teams/{team_id}/projects'
 
         print(f'Getting team projects, requesting URL: {api_request_url}')
@@ -133,15 +134,6 @@ class FigmaFilesListGetter(object):
         project_files = []
 
         for file in api_response_data.get('files', []):
-            # if not os.path.exists(f'./store/TEAM {project["team"]}'):
-            #     os.makedirs(f'./store/TEAM {project["team"]}')
-            # if not os.path.exists(f'./store/TEAM {project["team"]}/PROJECT {project_name}/'):
-            #     os.makedirs(
-            #         f'./store/TEAM {project["team"]}/PROJECT {project_name}/')
-            # if not os.path.exists(f'./store/TEAM {project["team"]}/PROJECT {project_name}/map/'):
-            #     os.makedirs(
-            #         f'./store/TEAM {project["team"]}/PROJECT {project_name}/map/')
-
             fileName = f'{file["name"]}'
             fileName = fileName.replace('/', '_')
             fileName = fileName.replace('?', '_')
@@ -168,6 +160,7 @@ class FigmaFilesListGetter(object):
             else:
                 file_name_to_check = f'{fileName}.jam'
                 full_file_name = f'./store/TEAM {project["team"]}/PROJECT {project_name}/{file_name_to_check}'
+
                 if os.path.isfile(full_file_name):
                     time = os.path.getmtime(full_file_name)
                     if os.path.isfile(map_file):
@@ -175,9 +168,10 @@ class FigmaFilesListGetter(object):
                     with open(map_file, "w") as text_file:
                         text_file.write(file_name_to_check)
 
-            updates = datetime.strptime(
-                file["last_modified"], "%Y-%m-%dT%H:%M:%SZ").timestamp()
+            updates = datetime.strptime(file["last_modified"], "%Y-%m-%dT%H:%M:%SZ").timestamp()
+
             print(f'time: {time}, updated: {updates}')
+
             if time < updates:
                 print(
                     f'File TEAM {project["team"]}/PROJECT {project_name}/{fileName}, key {file["key"]}, last modified: {file["last_modified"]} -> adding to the list')
@@ -192,12 +186,12 @@ class FigmaFilesListGetter(object):
                     }
                 )
             else:
-                print(
-                    f'File {project["team"]}/{project_name}/{file["name"]}, key {file["key"]}, last modified: {file["last_modified"]} not modifided')
+                print( f'File {project["team"]}/{project_name}/{file["name"]}, key {file["key"]}, last modified: {file["last_modified"]} not modifided')
 
         return project_files
 
     def _get_projects_files(self, projects: list) -> list:
+
         print('Getting the files of all projects')
 
         projects_files = []
@@ -209,6 +203,7 @@ class FigmaFilesListGetter(object):
         return projects_files
 
     def _merge_files(self, projects_files: list) -> list:
+
         print('Merging projects files with files listed in config, if any, removing duplicates')
 
         merged_files = []
@@ -240,17 +235,18 @@ class FigmaFilesListGetter(object):
         projects = self._merge_projects(teams_projects)
         projects_files = self._get_projects_files(projects)
         files = self._merge_files(projects_files)
-        output_file_path = Path(self.config.get(
-            'output_file', './process/figma_files_list.json'))
+        output_file_path = Path(self.config.get('output_file', './process/figma_files_list.json'))
         output_limit = self.config.get('output_limit', 0)
 
         if not output_limit or len(files) <= output_limit:
+
             print('Writing the single output file')
 
             with open(output_file_path, 'w', encoding='utf8') as output_file:
                 json.dump(files, output_file, ensure_ascii=False, indent=4)
 
         else:
+            
             print('Writing multiple output files with partial slices')
 
             parts_count = int((len(files) - 1) / output_limit) + 1
