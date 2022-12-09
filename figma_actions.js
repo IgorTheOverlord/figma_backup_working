@@ -38,7 +38,7 @@ function readSettings() {
         doDebug: false,
         saveScreenOnError: true
     }
-    
+
     if (fs.existsSync('./config/download_settings.json')) {
         const data = fs.readFileSync('./config/download_settings.json');
         newSettings = JSON.parse(data);
@@ -53,7 +53,6 @@ function readSettings() {
         settings.saveScreenOnError = newSettings.saveScreenOnError ?? settings.saveScreenOnError;
         settings.pageLoadTimeout = newSettings.pageLoadTimeout ?? settings.pageLoadTimeout;
     }
-
     return settings;
 }
 
@@ -66,7 +65,9 @@ async function open(settings) {
 }
 
 async function login(session, settings) {
+    
     try {
+        
         // Opening the login page
         logger.info('Opening the login page');
         await session.page.goto(loginPageUrl, {waitUntil: 'networkidle2'});
@@ -93,13 +94,16 @@ async function login(session, settings) {
         // Sleeping for 10 seconds
         await sleep(settings.loginTimeout);
 
+
         // Waiting for an after-login page loading
         await session.page.waitForSelector(filebrowserSelector);
+
     } catch (err) {
         console.error(err);
         process.exit(1);
     }
 }
+
 
 const HTTP_NOT_200 = -1;
 const SAVE_NOT_ALLOWED = -2;
@@ -109,11 +113,13 @@ const CANNOT_OPEN_FILE_MENU = -5;
 const DOWNLOAD_FAILED = -6;
 const UNKNOWN_ERROR = -7;
 
+
 async function downloadFile(session, file, settings) {
+
     let debugDir = settings.debugDir;
     let page = session.page;
-
     let filePage = "" 
+
     if (file.uri && file.uri.startsWith("http")) {
         filePage = file.uri
     } else if (file.uri) {
@@ -127,23 +133,33 @@ async function downloadFile(session, file, settings) {
     logger.info('Starting to process file, url: ' + filePage);
 
     try {
+
         // Opening a file page
         let filePageResponse = await page.goto(filePage, {waitUntil: 'networkidle2'});
+
+
         // Checking status code
         if(filePageResponse.status() !== 200) {
             logger.info(`Skipping the file, status = ${filePageResponse.status()}`);
             return HTTP_NOT_200;
         } 
+
+
         // Sleeping for 10 seconds, waiting for a specific element in React-generated content
         await sleep(settings.pageOpenTimeout);
         await page.waitForSelector('[data-testid="set-tool-default"]', {timeout: settings.pageLoadTimeout});
+
+
         // Checking if the file is available to save locally
         let content = await page.content();
+
 
         if(content.includes('="Viewers can\'t copy or share this file."')) {
             logger.info('This file is protected against saving locally and sharing. Skipping')
             return SAVE_NOT_ALLOWED;
         }
+
+
         // Getting and validating page title
         const title = await page.title();
         const fileName = title.replace(' – Figma', '').replaceAll('/', '_').replaceAll('|', '_').replaceAll('"', '_');
@@ -154,6 +170,8 @@ async function downloadFile(session, file, settings) {
             }
             return BAD_FILE_FORMAT;
         }
+
+
         // Getting the local path of the directory for the file to download
         let downloadDir = file.path;
 
@@ -175,15 +193,16 @@ async function downloadFile(session, file, settings) {
     
         fs.mkdirSync(downloadDir, {recursive: true});
 
+
         // Set download behavior
         await page._client.send('Page.setDownloadBehavior', {behavior: 'allow', downloadPath: tmpDownloadDir});
 
+        
         // Debug: making screenshot and saving the page content
         if(settings.debugDir && settings.doDebug) {
             fs.writeFile(debugDir + title + '_content' + '.html', content, () => {});
             await page.screenshot({path: debugDir + fileName + '_screenshot' + '.png', fullPage: true});
         }
-
 
         await page.evaluate(_ => {
             const mainMenu = document.querySelector('button[data-tooltip="main-menu"]');
@@ -254,7 +273,6 @@ async function downloadFile(session, file, settings) {
                         donwloadedFile = files[0]
                     }
 
-
                     if (donwloadedFile.length) {
                         if (fs.existsSync(downloadDir + donwloadedFile)) {
                             const tmpFileName = donwloadedFile.lastIndexOf('.');
@@ -274,7 +292,6 @@ async function downloadFile(session, file, settings) {
                                 fs.writeFileSync(downloadDir + 'map/' + file.key, donwloadedFile)
                             }
                         }
-                        
                         downloaded = true;
                     }
                 } catch (error) {
