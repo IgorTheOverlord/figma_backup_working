@@ -184,7 +184,7 @@ class FigmaFilesListGetter(object):
                     'team': project['team'],
                     'file': file["name"],
                     'last_modified': file['last_modified'],
-                    'path': f'./hello/TEAM {project["team"]}/PROJECT {project_name}/'
+                    'path': f'./store/TEAM {project["team"]}/PROJECT {project_name}/'
                 }
             )
         return project_files
